@@ -1,17 +1,15 @@
-from django.urls import include, path
-from rest_framework.routers import SimpleRouter
+from django.urls import path
 
 from orders_app.api.views import (
     CompletedOrderCountView,
     OrderCountView,
-    OrderViewSet,
+    OrderDetailView,
+    OrderListCreateView,
 )
 
-router = SimpleRouter()
-router.register('orders', OrderViewSet, basename='order')
-
 urlpatterns = [
-    path('', include(router.urls)),
+    path('orders/', OrderListCreateView.as_view(), name='order-list'),
+    path('orders/<id:pk>/', OrderDetailView.as_view(), name='order-detail'),
     path(
         'order-count/<id:business_user_id>/',
         OrderCountView.as_view(),
