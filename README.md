@@ -127,6 +127,7 @@ Authorization: Token <token>
 | POST | `/api/reviews/` | customer users |
 | PATCH | `/api/reviews/{id}/` | author only |
 | DELETE | `/api/reviews/{id}/` | author only |
+| GET | `/api/base-info/` | public |
 
 Login uses the username, not the email address.
 
@@ -167,6 +168,12 @@ The review list accepts `business_user_id`, `reviewer_id` and `ordering`
 first. A PATCH accepts `rating` (1 to 5) and `description` only. There is no
 `GET /api/reviews/{id}/`.
 
+### Base info
+
+`/api/base-info/` returns the number of reviews, the average rating rounded
+to one decimal (`0` without reviews), the number of business profiles and the
+number of offers.
+
 Profile pictures are sent as `multipart/form-data` in the `file` field and
 returned as an absolute URL, or `null` when there is none. Empty text fields
 of a profile are returned as `""`, never as `null`.
@@ -184,6 +191,12 @@ of a profile are returned as `""`, never as `null`.
   once. The API specification lists both 400 and 403 for this case; the API
   answers 403, because the request is well formed but not allowed. Invalid
   data, such as a rating outside 1 to 5, returns 400.
+- **An invalid token counts as no token.** The frontend sends its stored
+  token with every request. After a database reset that token is stale, and
+  Django REST Framework would answer 401 even on the public offer list and
+  base info, where the specification lists no 401. The API therefore treats
+  an invalid token like a missing one: public endpoints work, protected ones
+  still return 401.
 
 ## Project layout
 
