@@ -3,7 +3,6 @@ from django import forms
 from rest_framework import filters
 from rest_framework.exceptions import ValidationError
 
-
 # Largest value a database integer column holds.
 MAX_INTEGER = 2 ** 63 - 1
 

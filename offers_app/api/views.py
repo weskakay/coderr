@@ -4,6 +4,7 @@ from rest_framework import filters, generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from core.filters import StrictOrderingFilter
+from core.mixins import ActionConfigMixin
 from offers_app.api.filters import OfferFilter
 from offers_app.api.pagination import OfferPagination
 from offers_app.api.permissions import IsOfferOwner
@@ -17,7 +18,7 @@ from offers_app.models import Offer, OfferDetail
 from profile_app.api.permissions import IsBusinessUser
 
 
-class OfferViewSet(viewsets.ModelViewSet):
+class OfferViewSet(ActionConfigMixin, viewsets.ModelViewSet):
     """List, create, read, update and delete offers.
 
     The list is public and paginated. Minimum price and delivery time are
@@ -53,23 +54,6 @@ class OfferViewSet(viewsets.ModelViewSet):
         'create': OfferWriteSerializer,
         'partial_update': OfferWriteSerializer,
     }
-
-    def get_permissions(self):
-        """Return the permissions of the current action."""
-        classes = self.action_permissions.get(
-            self.action, self.permission_classes,
-        )
-        return [permission() for permission in classes]
-
-    def get_serializer_class(self):
-        """Return the serializer of the current action."""
-        return self.action_serializers.get(self.action, self.serializer_class)
-
-    def filter_queryset(self, queryset):
-        """Apply filters, search and ordering to the list only."""
-        if self.action != 'list':
-            return queryset
-        return super().filter_queryset(queryset)
 
     def perform_create(self, serializer):
         """Store the requesting user as the creator."""

@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from offers_app.models import OfferDetail
+from core.mixins import ActionConfigMixin
 from orders_app.api.permissions import IsOrderBusinessUser
 from orders_app.api.serializers import (
     OrderCreateSerializer,
@@ -17,7 +17,8 @@ from profile_app.api.permissions import IsCustomerUser
 from profile_app.models import Profile
 
 
-class OrderViewSet(mixins.ListModelMixin,
+class OrderViewSet(ActionConfigMixin,
+                   mixins.ListModelMixin,
                    mixins.CreateModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
@@ -41,33 +42,19 @@ class OrderViewSet(mixins.ListModelMixin,
         'partial_update': OrderStatusSerializer,
     }
 
-    def get_permissions(self):
-        """Return the permissions of the current action."""
-        classes = self.action_permissions.get(
-            self.action, self.permission_classes,
-        )
-        return [permission() for permission in classes]
-
-    def get_serializer_class(self):
-        """Return the serializer of the current action."""
-        return self.action_serializers.get(self.action, self.serializer_class)
-
     def get_queryset(self):
         """Limit the list to orders the user takes part in."""
+        queryset = super().get_queryset()
         if self.action != 'list':
-            return self.queryset
+            return queryset
         user = self.request.user
-        return self.queryset.filter(
+        return queryset.filter(
             Q(customer_user=user) | Q(business_user=user),
         )
 
     def perform_create(self, serializer):
-        """Look the package up and order it for the requesting customer."""
-        detail = get_object_or_404(
-            OfferDetail.objects.select_related('offer'),
-            pk=serializer.validated_data['offer_detail_id'],
-        )
-        serializer.save(customer_user=self.request.user, offer_detail=detail)
+        """Order the package for the requesting customer."""
+        serializer.save(customer_user=self.request.user)
 
 
 class OrderCountView(APIView):

@@ -8,7 +8,9 @@ class OfferDetailInline(admin.TabularInline):
 
     model = OfferDetail
     extra = 0
+    min_num = 3
     max_num = 3
+    can_delete = False
 
 
 @admin.register(Offer)

@@ -7,11 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from profile_app.models import Profile
-from profile_app.tests.utils import (
-    create_user,
-    make_image,
-    make_text_file,
-)
+from profile_app.tests.utils import create_user, make_image, make_text_file
 
 MEDIA_ROOT = tempfile.mkdtemp()
 
@@ -100,10 +96,9 @@ class ProfileUpdateTests(APITestCase):
     def test_owner_updates_user_and_profile_fields(self):
         self.client.force_authenticate(self.owner)
         payload = {
-            'first_name': 'Max', 'last_name': 'Mustermann',
-            'location': 'Berlin', 'tel': '987654321',
-            'description': 'Updated', 'working_hours': '10-18',
-            'email': 'new@business.de',
+            'first_name': 'Max', 'last_name': 'Mustermann', 'tel': '98765',
+            'location': 'Berlin', 'description': 'Updated',
+            'working_hours': '10-18', 'email': 'new@business.de',
         }
         response = self.client.patch(self.url, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

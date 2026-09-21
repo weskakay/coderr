@@ -93,6 +93,13 @@ class OfferUpdateTests(APITestCase):
         response = self.patch(self.owner, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_type_the_offer_lacks_returns_400(self):
+        self.offer.details.filter(offer_type='premium').delete()
+        payload = {'details': [{'offer_type': 'premium', 'price': 1}]}
+        response = self.patch(self.owner, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('details', response.data)
+
     def test_stranger_gets_403_before_validation(self):
         payload = {'details': [{'offer_type': 'gold'}]}
         response = self.patch(self.stranger, payload)

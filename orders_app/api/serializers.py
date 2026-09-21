@@ -1,5 +1,8 @@
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
+from core.filters import MAX_INTEGER
+from offers_app.models import OfferDetail
 from orders_app.models import Order
 
 ORDER_FIELDS = [
@@ -21,18 +24,28 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderCreateSerializer(OrderSerializer):
     """Creates an order from a package id.
 
-    The view looks the package up and passes it to save() as
-    offer_detail, so a missing package becomes a 404, not a 400.
+    A malformed id is a 400, an id without a package is a 404.
     """
 
-    offer_detail_id = serializers.IntegerField(write_only=True, min_value=1)
+    offer_detail_id = serializers.IntegerField(
+        write_only=True, min_value=1, max_value=MAX_INTEGER,
+    )
 
     class Meta(OrderSerializer.Meta):
         fields = ORDER_FIELDS + ['offer_detail_id']
 
+    def validate_offer_detail_id(self, value):
+        """Return the package behind the id, or answer 404."""
+        detail = OfferDetail.objects.select_related('offer').filter(
+            pk=value,
+        ).first()
+        if detail is None:
+            raise NotFound('No package matches this id.')
+        return detail
+
     def create(self, validated_data):
         """Copy the package data into a new order."""
-        detail = validated_data['offer_detail']
+        detail = validated_data['offer_detail_id']
         return Order.objects.create(
             customer_user=validated_data['customer_user'],
             business_user=detail.offer.user,

@@ -102,7 +102,20 @@ class OfferWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Every detail needs its own offer_type.'
             )
+        if self.instance is not None:
+            self.check_types_exist(types)
         return value
+
+    def check_types_exist(self, types):
+        """Reject a package type the offer does not have."""
+        existing = set(
+            self.instance.details.values_list('offer_type', flat=True),
+        )
+        missing = sorted(set(types) - existing)
+        if missing:
+            raise serializers.ValidationError(
+                f'This offer has no {missing[0]} detail.'
+            )
 
     @transaction.atomic
     def create(self, validated_data):

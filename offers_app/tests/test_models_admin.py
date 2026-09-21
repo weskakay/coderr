@@ -44,3 +44,10 @@ class OfferAdminTests(TestCase):
         for url in urls:
             response = self.client.get(url, {'q': 'design'})
             self.assertEqual(response.status_code, 200, url)
+
+    def test_offer_page_keeps_exactly_three_packages(self):
+        url = reverse('admin:offers_app_offer_change', args=[self.offer.pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'name="details-MIN_NUM_FORMS" value="3"')
+        self.assertContains(response, 'name="details-MAX_NUM_FORMS" value="3"')
+        self.assertNotContains(response, 'details-0-DELETE')

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from profile_app.api.permissions import has_profile_type
 from profile_app.models import Profile
@@ -27,6 +28,18 @@ class ReviewSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate(self, attrs):
+        """Allow one review per business user, a second one is a 403."""
+        taken = Review.objects.filter(
+            business_user=attrs['business_user'],
+            reviewer=self.context['request'].user,
+        )
+        if taken.exists():
+            raise PermissionDenied(
+                'You have already reviewed this business user.'
+            )
+        return attrs
+
 
 class ReviewUpdateSerializer(ReviewSerializer):
     """Changes rating and description of a review and nothing else."""
@@ -37,10 +50,14 @@ class ReviewUpdateSerializer(ReviewSerializer):
         ]
 
     def validate(self, attrs):
-        """Reject any field besides rating and description."""
+        """Demand rating or description, reject any other field."""
         extra = sorted(set(self.initial_data) - EDITABLE_FIELDS)
         if extra:
             raise serializers.ValidationError(
                 {field: 'This field cannot be changed.' for field in extra}
+            )
+        if not attrs:
+            raise serializers.ValidationError(
+                'Send a rating or a description.'
             )
         return attrs

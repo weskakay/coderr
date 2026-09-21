@@ -39,6 +39,13 @@ class ReviewUpdateTests(APITestCase):
         self.review.refresh_from_db()
         self.assertEqual(self.review.rating, 4)
 
+    def test_empty_body_returns_400(self):
+        before = self.review.updated_at
+        response = self.patch(self.author, {})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.review.refresh_from_db()
+        self.assertEqual(self.review.updated_at, before)
+
     def test_invalid_rating_returns_400(self):
         response = self.patch(self.author, {'rating': 9})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
