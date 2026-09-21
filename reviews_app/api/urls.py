@@ -1,11 +1,12 @@
-from django.urls import include, path
-from rest_framework.routers import SimpleRouter
+from django.urls import path
 
-from reviews_app.api.views import ReviewViewSet
-
-router = SimpleRouter()
-router.register('reviews', ReviewViewSet, basename='review')
+from reviews_app.api.views import ReviewDetailView, ReviewListCreateView
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('reviews/', ReviewListCreateView.as_view(), name='review-list'),
+    path(
+        'reviews/<id:pk>/',
+        ReviewDetailView.as_view(),
+        name='review-detail',
+    ),
 ]
