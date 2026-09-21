@@ -39,6 +39,16 @@ class IsCustomerUser(BasePermission):
         return has_profile_type(request.user, Profile.CUSTOMER)
 
 
+class IsBusinessUserOrReadOnly(IsBusinessUser):
+    """Anyone may read, only business users may create."""
+
+    def has_permission(self, request, view):
+        """Allow reads, check the account type for everything else."""
+        if request.method in SAFE_METHODS:
+            return True
+        return super().has_permission(request, view)
+
+
 class IsCustomerUserOrReadOnly(IsCustomerUser):
     """Anyone may read, only customer users may create."""
 
