@@ -1,15 +1,7 @@
 import django_filters
-from django import forms
-from rest_framework import filters
-from rest_framework.exceptions import ValidationError
 
+from core.filters import IntegerFilter
 from offers_app.models import Offer
-
-
-class IntegerFilter(django_filters.NumberFilter):
-    """Number filter that only accepts whole numbers."""
-
-    field_class = forms.IntegerField
 
 
 class OfferFilter(django_filters.FilterSet):
@@ -32,19 +24,3 @@ class OfferFilter(django_filters.FilterSet):
     class Meta:
         model = Offer
         fields = ['creator_id', 'min_price', 'max_delivery_time']
-
-
-class StrictOrderingFilter(filters.OrderingFilter):
-    """Ordering filter that rejects unknown fields instead of ignoring them."""
-
-    def get_ordering(self, request, queryset, view):
-        """Raise a 400 for fields outside the view's ordering_fields."""
-        terms = request.query_params.get(self.ordering_param, '').split(',')
-        unknown = [
-            term for term in terms
-            if term.strip() and term.strip().lstrip('-')
-            not in view.ordering_fields
-        ]
-        if unknown:
-            raise ValidationError({'ordering': f'Unknown field: {unknown[0]}'})
-        return super().get_ordering(request, queryset, view)

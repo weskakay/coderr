@@ -73,14 +73,15 @@ class OfferFilterTests(APITestCase):
 
     def test_invalid_numbers_return_400(self):
         for params in [{'min_price': 'abc'}, {'creator_id': 'x'},
-                       {'max_delivery_time': '1.5'}]:
+                       {'max_delivery_time': '1.5'},
+                       {'creator_id': '99999999999999999999'}]:
             response = self.client.get(self.url, params)
             self.assertEqual(
                 response.status_code, status.HTTP_400_BAD_REQUEST, params,
             )
 
     def test_unknown_ordering_returns_400(self):
-        for value in ['title', 'foo', 'min_price,-user']:
+        for value in ['title', 'foo', 'min_price,-user', '--min_price']:
             response = self.client.get(self.url, {'ordering': value})
             self.assertEqual(
                 response.status_code, status.HTTP_400_BAD_REQUEST, value,

@@ -123,6 +123,10 @@ Authorization: Token <token>
 | DELETE | `/api/orders/{id}/` | staff only |
 | GET | `/api/order-count/{business_user_id}/` | logged in |
 | GET | `/api/completed-order-count/{business_user_id}/` | logged in |
+| GET | `/api/reviews/` | logged in |
+| POST | `/api/reviews/` | customer users |
+| PATCH | `/api/reviews/{id}/` | author only |
+| DELETE | `/api/reviews/{id}/` | author only |
 
 Login uses the username, not the email address.
 
@@ -156,6 +160,13 @@ so later changes to the offer do not touch existing orders. A PATCH accepts
 `status` only (`in_progress`, `completed`, `cancelled`), any other field
 returns 400. There is no `GET /api/orders/{id}/`.
 
+### Reviews
+
+The review list accepts `business_user_id`, `reviewer_id` and `ordering`
+(`updated_at` or `rating`, prefix `-` for descending). Newest reviews come
+first. A PATCH accepts `rating` (1 to 5) and `description` only. There is no
+`GET /api/reviews/{id}/`.
+
 Profile pictures are sent as `multipart/form-data` in the `file` field and
 returned as an absolute URL, or `null` when there is none. Empty text fields
 of a profile are returned as `""`, never as `null`.
@@ -169,6 +180,10 @@ of a profile are returned as `""`, never as `null`.
 - **Users with orders cannot be deleted.** Both users of an order are
   protected, so neither the customer nor the business user loses their order
   history. Delete the orders first, for example in the admin.
+- **A second review returns 403.** A customer may review each business user
+  once. The API specification lists both 400 and 403 for this case; the API
+  answers 403, because the request is well formed but not allowed. Invalid
+  data, such as a rating outside 1 to 5, returns 400.
 
 ## Project layout
 

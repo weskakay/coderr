@@ -3,7 +3,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from offers_app.api.filters import OfferFilter, StrictOrderingFilter
+from core.filters import StrictOrderingFilter
+from offers_app.api.filters import OfferFilter
 from offers_app.api.pagination import OfferPagination
 from offers_app.api.permissions import IsOfferOwner
 from offers_app.api.serializers import (
