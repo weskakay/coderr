@@ -1,25 +1,17 @@
 from django.contrib.auth import authenticate
-from rest_framework import status
-from rest_framework.authtoken.models import Token
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from auth_app.api.serializers import LoginSerializer, RegistrationSerializer
+from auth_app.api.serializers import (
+    LoginSerializer,
+    RegistrationSerializer,
+    build_auth_response,
+)
 
 
-def build_auth_response(user):
-    """Return the payload the frontend expects after authentication."""
-    token, _ = Token.objects.get_or_create(user=user)
-    return {
-        'token': token.key,
-        'username': user.username,
-        'email': user.email,
-        'user_id': user.id,
-    }
-
-
-class RegistrationView(APIView):
+class RegistrationView(generics.CreateAPIView):
     """POST /api/registration/ creates an account and returns a token.
 
     No authentication runs here, so a stale token sent by the frontend
@@ -28,16 +20,7 @@ class RegistrationView(APIView):
 
     authentication_classes = []
     permission_classes = [AllowAny]
-
-    def post(self, request):
-        """Register a new customer or business user."""
-        serializer = RegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        return Response(
-            build_auth_response(user),
-            status=status.HTTP_201_CREATED,
-        )
+    serializer_class = RegistrationSerializer
 
 
 class LoginView(APIView):

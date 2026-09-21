@@ -1,9 +1,21 @@
 from django.contrib.auth.models import User
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 from rest_framework.validators import UniqueValidator
 
 from profile_app.models import Profile
+
+
+def build_auth_response(user):
+    """Return the payload the frontend expects after authentication."""
+    token, _ = Token.objects.get_or_create(user=user)
+    return {
+        'token': token.key,
+        'username': user.username,
+        'email': user.email,
+        'user_id': user.id,
+    }
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -47,6 +59,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         Profile.objects.create(user=user, type=profile_type)
         return user
+
+    def to_representation(self, instance):
+        """Answer with the token payload instead of the form fields."""
+        return build_auth_response(instance)
 
 
 class LoginSerializer(serializers.Serializer):
