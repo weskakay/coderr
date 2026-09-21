@@ -1,0 +1,15 @@
+[run]
+source =
+    auth_app
+    profile_app
+    offers_app
+    orders_app
+    reviews_app
+    base_info_app
+    core
+omit =
+    */migrations/*
+    */tests/*
+    core/asgi.py
+    core/wsgi.py
+    manage.py
