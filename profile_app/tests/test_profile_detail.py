@@ -63,6 +63,11 @@ class ProfileRetrieveTests(APITestCase):
         response = self.client.get(profile_url(9999))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_huge_id_returns_404(self):
+        self.client.force_authenticate(self.owner)
+        response = self.client.get('/api/profile/99999999999999999999/')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_user_without_profile_returns_404(self):
         admin = create_user('admin')
         admin.profile.delete()

@@ -27,3 +27,13 @@ class IsBusinessUser(BasePermission):
     def has_permission(self, request, view):
         """Check the account type of the requesting user."""
         return has_profile_type(request.user, Profile.BUSINESS)
+
+
+class IsCustomerUser(BasePermission):
+    """Allows access to users with a customer profile only."""
+
+    message = 'Only customer users may do this.'
+
+    def has_permission(self, request, view):
+        """Check the account type of the requesting user."""
+        return has_profile_type(request.user, Profile.CUSTOMER)

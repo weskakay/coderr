@@ -117,6 +117,12 @@ Authorization: Token <token>
 | PATCH | `/api/offers/{id}/` | creator only |
 | DELETE | `/api/offers/{id}/` | creator only |
 | GET | `/api/offerdetails/{id}/` | logged in |
+| GET | `/api/orders/` | logged in, own orders only |
+| POST | `/api/orders/` | customer users |
+| PATCH | `/api/orders/{id}/` | business user of the order |
+| DELETE | `/api/orders/{id}/` | staff only |
+| GET | `/api/order-count/{business_user_id}/` | logged in |
+| GET | `/api/completed-order-count/{business_user_id}/` | logged in |
 
 Login uses the username, not the email address.
 
@@ -142,6 +148,14 @@ A PATCH finds packages by `offer_type` and updates them in place, so their
 ids never change. `revisions: -1` means unlimited revisions. Prices are
 returned as numbers.
 
+### Orders
+
+An order is created from one package with `{"offer_detail_id": 1}`. Title,
+price, delivery time, revisions and features are copied from the package,
+so later changes to the offer do not touch existing orders. A PATCH accepts
+`status` only (`in_progress`, `completed`, `cancelled`), any other field
+returns 400. There is no `GET /api/orders/{id}/`.
+
 Profile pictures are sent as `multipart/form-data` in the `file` field and
 returned as an absolute URL, or `null` when there is none. Empty text fields
 of a profile are returned as `""`, never as `null`.
@@ -152,6 +166,9 @@ of a profile are returned as `""`, never as `null`.
   passwords match and that username and email are still free. The guest
   account `andrey` uses the password `asdasd`, which Django's password
   validators would reject. `createsuperuser` and the admin still apply them.
+- **Users with orders cannot be deleted.** Both users of an order are
+  protected, so neither the customer nor the business user loses their order
+  history. Delete the orders first, for example in the admin.
 
 ## Project layout
 

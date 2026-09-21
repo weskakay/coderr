@@ -9,7 +9,7 @@ router.register('offers', OfferViewSet, basename='offer')
 urlpatterns = [
     path('', include(router.urls)),
     path(
-        'offerdetails/<int:pk>/',
+        'offerdetails/<id:pk>/',
         OfferDetailRetrieveView.as_view(),
         name='offerdetail-detail',
     ),

@@ -8,7 +8,7 @@ from profile_app.api.views import (
 
 urlpatterns = [
     path(
-        'profile/<int:pk>/',
+        'profile/<id:pk>/',
         ProfileDetailView.as_view(),
         name='profile-detail',
     ),
