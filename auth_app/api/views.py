@@ -2,7 +2,6 @@ from django.contrib.auth import authenticate
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from auth_app.api.serializers import (
     LoginSerializer,
@@ -23,7 +22,7 @@ class RegistrationView(generics.CreateAPIView):
     serializer_class = RegistrationSerializer
 
 
-class LoginView(APIView):
+class LoginView(generics.GenericAPIView):
     """POST /api/login/ returns a token for valid credentials.
 
     Ignores any token header for the same reason as registration.
@@ -31,10 +30,11 @@ class LoginView(APIView):
 
     authentication_classes = []
     permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
 
     def post(self, request):
         """Log an existing user in by username."""
-        serializer = LoginSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = authenticate(request, **serializer.validated_data)
         if user is None:
