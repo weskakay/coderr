@@ -111,8 +111,36 @@ Authorization: Token <token>
 | PATCH | `/api/profile/{user_id}/` | own profile only |
 | GET | `/api/profiles/business/` | logged in |
 | GET | `/api/profiles/customer/` | logged in |
+| GET | `/api/offers/` | public |
+| POST | `/api/offers/` | business users |
+| GET | `/api/offers/{id}/` | logged in |
+| PATCH | `/api/offers/{id}/` | creator only |
+| DELETE | `/api/offers/{id}/` | creator only |
+| GET | `/api/offerdetails/{id}/` | logged in |
 
 Login uses the username, not the email address.
+
+### Offer list
+
+The offer list is the only paginated endpoint, with 6 offers per page by
+default. It accepts these query parameters:
+
+| Parameter | Effect |
+|---|---|
+| `creator_id` | offers of this user only |
+| `min_price` | cheapest package costs at least this much |
+| `max_delivery_time` | fastest package takes at most this many days |
+| `search` | searches title and description |
+| `ordering` | `updated_at` or `min_price`, prefix `-` for descending |
+| `page`, `page_size` | page number and offers per page (max 100) |
+
+Empty parameters are ignored. Invalid numbers or an unknown ordering field
+return 400.
+
+Every offer has exactly three packages: `basic`, `standard` and `premium`.
+A PATCH finds packages by `offer_type` and updates them in place, so their
+ids never change. `revisions: -1` means unlimited revisions. Prices are
+returned as numbers.
 
 Profile pictures are sent as `multipart/form-data` in the `file` field and
 returned as an absolute URL, or `null` when there is none. Empty text fields
