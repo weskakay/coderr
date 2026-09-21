@@ -68,13 +68,30 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-**7. Start the server**
+**7. Create the guest accounts**
+
+```bash
+python manage.py seed_guests
+```
+
+**8. Start the server**
 
 ```bash
 python manage.py runserver
 ```
 
 The API runs at `http://127.0.0.1:8000/api/`.
+
+## Guest accounts
+
+The frontend offers two guest logins. `seed_guests` creates both. Running it
+again resets their passwords and account types, it never creates
+duplicates.
+
+| Type | Username | Password |
+|---|---|---|
+| customer | `andrey` | `asdasd` |
+| business | `kevin` | `asdasd24` |
 
 ## Authentication
 
@@ -86,7 +103,27 @@ Authorization: Token <token>
 
 ## Endpoints
 
-The endpoint list grows with each feature.
+| Method | URL | Access |
+|---|---|---|
+| POST | `/api/registration/` | public |
+| POST | `/api/login/` | public |
+| GET | `/api/profile/{user_id}/` | logged in |
+| PATCH | `/api/profile/{user_id}/` | own profile only |
+| GET | `/api/profiles/business/` | logged in |
+| GET | `/api/profiles/customer/` | logged in |
+
+Login uses the username, not the email address.
+
+Profile pictures are sent as `multipart/form-data` in the `file` field and
+returned as an absolute URL, or `null` when there is none. Empty text fields
+of a profile are returned as `""`, never as `null`.
+
+## Design decisions
+
+- **No password rules on registration.** The API only checks that both
+  passwords match and that username and email are still free. The guest
+  account `andrey` uses the password `asdasd`, which Django's password
+  validators would reject. `createsuperuser` and the admin still apply them.
 
 ## Project layout
 
