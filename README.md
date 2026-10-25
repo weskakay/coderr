@@ -8,6 +8,13 @@ premium). Customers order a package and review the business afterwards.
 
 The frontend is not part of this repository, see [Frontend](#frontend).
 
+## Live demo
+
+- Frontend: https://coderr.weskakay.de
+- API: https://weskakay.eu.pythonanywhere.com/api/
+
+Log in with one of the [guest accounts](#guest-accounts).
+
 ## Requirements
 
 - Python 3.12+
@@ -282,7 +289,8 @@ account may delete orders through the API.
 
 `SECRET_KEY` and `DEBUG` are read from environment variables and fall back
 to development defaults, so the setup above works without any configuration.
-`.env.example` lists both variables.
+`.env.example` lists all variables. With `DJANGO_DEBUG=False` there is no
+default key, the server does not start without `DJANGO_SECRET_KEY`.
 
 To set your own secret key, export it before starting the server.
 
@@ -304,6 +312,58 @@ is on.
 
 Cross origin requests are allowed from `127.0.0.1` and `localhost` on ports
 5500 and 5501, which is where the frontend is usually served.
+
+Two more variables are only needed on a server. Both take a space separated
+list and are empty or local by default:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `DJANGO_ALLOWED_HOSTS` | `127.0.0.1 localhost` | domains the API answers on |
+| `DJANGO_CORS_ORIGINS` | empty | extra frontend origins, added to the local ones |
+
+## Deployment
+
+The live demo runs on PythonAnywhere with SQLite. The steps for any host
+with a WSGI server are the same:
+
+1. Clone the repository and install `requirements.txt` into a virtual
+   environment.
+2. Set `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=False`, `DJANGO_ALLOWED_HOSTS` and
+   `DJANGO_CORS_ORIGINS` in the WSGI file or the environment of the server.
+3. Run the migrations:
+
+```bash
+python manage.py migrate
+```
+
+4. Collect the admin styles into `staticfiles/`:
+
+```bash
+python manage.py collectstatic
+```
+
+5. Create the guest accounts:
+
+```bash
+python manage.py seed_guests
+```
+
+6. Create a staff account with a strong password:
+
+```bash
+python manage.py createsuperuser
+```
+
+7. Let the web server serve `/static/` from `staticfiles/` and `/media/`
+   from `media/`. With `DEBUG` off, Django serves neither.
+
+The frontend is a static site. For the live demo only two values in its
+`config.js` changed:
+
+| Setting | Value |
+|---|---|
+| `API_BASE_URL` | `https://weskakay.eu.pythonanywhere.com/api/` |
+| `STATIC_BASE_URL` | `https://weskakay.eu.pythonanywhere.com/` |
 
 ## Development
 
