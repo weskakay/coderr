@@ -76,3 +76,15 @@ class OrderStatusSerializer(OrderSerializer):
                 {'status': 'This field is required.'}
             )
         return attrs
+
+
+class OrderCountSerializer(serializers.Serializer):
+    """Number of orders a business user still has in progress."""
+
+    order_count = serializers.IntegerField()
+
+
+class CompletedOrderCountSerializer(serializers.Serializer):
+    """Number of orders a business user has completed."""
+
+    completed_order_count = serializers.IntegerField()

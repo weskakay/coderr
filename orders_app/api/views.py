@@ -2,11 +2,11 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from orders_app.api.permissions import IsOrderBusinessUser
 from orders_app.api.serializers import (
+    CompletedOrderCountSerializer,
+    OrderCountSerializer,
     OrderCreateSerializer,
     OrderSerializer,
     OrderStatusSerializer,
@@ -19,13 +19,14 @@ from profile_app.models import Profile
 class OrderListCreateView(generics.ListCreateAPIView):
     """GET and POST /api/orders/, only customers may order."""
 
+    queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated, IsCustomerUserOrReadOnly]
 
     def get_queryset(self):
         """Only the orders the user takes part in, as customer or business."""
         user = self.request.user
-        return Order.objects.filter(
+        return super().get_queryset().filter(
             Q(customer_user=user) | Q(business_user=user),
         )
 
@@ -59,26 +60,29 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return super().get_permissions()
 
 
-class OrderCountView(APIView):
+class OrderCountView(generics.RetrieveAPIView):
     """GET /api/order-count/{id}/ counts a business user's open orders."""
 
     permission_classes = [IsAuthenticated]
+    serializer_class = OrderCountSerializer
     counted_status = Order.IN_PROGRESS
     response_key = 'order_count'
 
-    def get(self, request, business_user_id):
+    def get_object(self):
         """Return the count, or 404 if there is no such business user."""
+        business_user_id = self.kwargs['business_user_id']
         get_object_or_404(
             Profile, user_id=business_user_id, type=Profile.BUSINESS,
         )
         count = Order.objects.filter(
             business_user_id=business_user_id, status=self.counted_status,
         ).count()
-        return Response({self.response_key: count})
+        return {self.response_key: count}
 
 
 class CompletedOrderCountView(OrderCountView):
     """GET /api/completed-order-count/{id}/ counts completed orders."""
 
+    serializer_class = CompletedOrderCountSerializer
     counted_status = Order.COMPLETED
     response_key = 'completed_order_count'
