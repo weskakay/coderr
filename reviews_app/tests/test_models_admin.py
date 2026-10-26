@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework import status
 
 from profile_app.models import Profile
 from profile_app.tests.utils import create_user
@@ -46,4 +47,4 @@ class ReviewAdminTests(TestCase):
         ]
         for url in urls:
             response = self.client.get(url, {'q': 'good'})
-            self.assertEqual(response.status_code, 200, url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK, url)

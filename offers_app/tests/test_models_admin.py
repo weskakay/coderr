@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework import status
 
 from offers_app.models import OfferDetail
 from offers_app.tests.utils import create_offer, detail_payload
@@ -43,7 +44,7 @@ class OfferAdminTests(TestCase):
         ]
         for url in urls:
             response = self.client.get(url, {'q': 'design'})
-            self.assertEqual(response.status_code, 200, url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK, url)
 
     def test_offer_page_keeps_exactly_three_packages(self):
         url = reverse('admin:offers_app_offer_change', args=[self.offer.pk])

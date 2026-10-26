@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework import status
 
 from profile_app.tests.utils import create_user
 
@@ -17,7 +18,7 @@ class ProfileAdminTests(TestCase):
         url = reverse('admin:profile_app_profile_changelist')
         query = {'q': 'jane', 'type__exact': 'customer'}
         response = self.client.get(url, query)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, 'jane')
 
     def test_change_page_opens(self):
@@ -25,7 +26,7 @@ class ProfileAdminTests(TestCase):
             'admin:profile_app_profile_change', args=[self.profile.pk],
         )
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_user_added_in_admin_gets_a_profile(self):
         payload = {
@@ -35,7 +36,7 @@ class ProfileAdminTests(TestCase):
             'profile-0-type': 'business',
         }
         response = self.client.post(reverse('admin:auth_user_add'), payload)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         user = User.objects.get(username='newbie')
         self.assertEqual(user.profile.type, 'business')
 
